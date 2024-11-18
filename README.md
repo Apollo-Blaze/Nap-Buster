@@ -27,6 +27,8 @@ For demonstartional purposes I have kept the sleep time as 20 seconds...
 
 ![Nap-Buster Demo](./demo.gif)
 
+The gif ends abruptly cuz the laptop went into sleep :)
+
 Watch as Nap-Buster keeps your laptop awake with real-time face detection and simulated activity to make sure your screen stays on when you need it!
 
 ## Contributing

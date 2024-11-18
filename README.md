@@ -23,6 +23,7 @@ Nap-Buster keeps your laptop alert and active by making sure it knows when you'r
 - **Plyer**: For desktop notifications when checking for user presence.
 
 ## Demo
+For demonstartional purposes I have kept the sleep time as 20 seconds...
 
 ![Nap-Buster Demo](./demo.gif)
 

@@ -31,7 +31,7 @@ The gif ends abruptly cuz the laptop went into sleep :)
 
 ## Contributing
 
-Your contributions are welcome! If you'd like to add a feature, fix bugs, or improve the code, feel free to fork this repo, open an issue, or submit a pull request.
+Your contributions are welcomed! If you'd like to add a feature, fix bugs, or improve the code, feel free to fork this repo, open an issue, or submit a pull request.
 
 
 ---

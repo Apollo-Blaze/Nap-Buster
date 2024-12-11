@@ -11,19 +11,50 @@ mp_face_detection = mp.solutions.face_detection
 
 # Function to get the system's sleep timeout
 def get_sleep_timeout():
+    class SYSTEM_POWER_STATUS(ctypes.Structure):
+        _fields_ = [
+            ("ACLineStatus", ctypes.c_byte),
+            ("BatteryFlag", ctypes.c_byte),
+            ("BatteryLifePercent", ctypes.c_byte),
+            ("Reserved1", ctypes.c_byte),
+            ("BatteryLifeTime", ctypes.c_ulong),
+            ("BatteryFullLifeTime", ctypes.c_ulong),
+        ]
+
     try:
+        # Get power status
+        power_status = SYSTEM_POWER_STATUS()
+        if not ctypes.windll.kernel32.GetSystemPowerStatus(ctypes.byref(power_status)):
+            raise Exception("Failed to get system power status")
+
+        # Determine if on battery or plugged in
+        is_battery = power_status.ACLineStatus == 0
+
         # Query the power settings to get the sleep timeout in seconds
         result = subprocess.check_output(
             "powercfg /query SCHEME_CURRENT SUB_SLEEP STANDBYIDLE", shell=True, text=True
         )
-        # Extract the timeout value
-        timeout_lines = [line for line in result.splitlines() if "ACSettingIndex" in line]
-        timeout_value = int(timeout_lines[0].split()[-1])  # Assuming AC settings are used
-        return timeout_value
+
+        # Extract the timeout value from AC or DC settings
+        ac_setting_line = [line for line in result.splitlines() if "Current AC Power Setting Index" in line]
+        dc_setting_line = [line for line in result.splitlines() if "Current DC Power Setting Index" in line]
+
+        if is_battery and dc_setting_line:
+            timeout_value = int(dc_setting_line[0].split()[-1], 16)  # Use DC setting on battery
+        elif ac_setting_line:
+            timeout_value = int(ac_setting_line[0].split()[-1], 16)  # Use AC setting otherwise
+        else:
+            raise ValueError("No valid power setting index found.")
+
+        # Ensure timeout value is valid
+        if timeout_value > 15:
+            return timeout_value - 15
+        else:
+            print("Sleep timeout is too short or zero. Using a default value.")
+            return 50  # Default to 50 seconds if timeout is invalid
     except Exception as e:
         print(f"Failed to retrieve sleep timeout. Using default. Error: {e}")
-        return 60  # Default to 20 seconds
-
+        return 50  # Default to 50 seconds
 
 # Function to get idle time on Windows
 def get_idle_time():
@@ -103,7 +134,6 @@ def main():
                 simulate_activity()
             else:
                 print("No person detected.")
-                put_system_to_sleep()
                 break  # Exit the loop once the system goes to sleep
 
         # Wait before the next check
